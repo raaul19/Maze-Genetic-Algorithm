@@ -8,13 +8,12 @@ class Individuo:
         self._fitness = 0
 
 class AGC:
-    def __init__(self, cantidad_individuos, alelos, generaciones, p, problema, maxim = True):
+    def __init__(self, cantidad_individuos, alelos, generaciones, p, problema):
         self._cantidad_individuos = cantidad_individuos
         self._alelos = alelos
         self._generaciones = generaciones
         self._p = p
         self._problema = problema
-        self._maxim = maxim
         self._individuos = np.array([])
         self._values = []
 
@@ -41,22 +40,22 @@ class AGC:
                 print(f'Generación: {generacion} Mejor Histórico: \
                 {self._mejor_historico._cromosoma} {self._mejor_historico._fitness :.5f}')
                 self._values.append(self._mejor_historico._fitness)
+                print(self._problema)
             generacion += 1
 
 
     def crearIndividuos(self):
-        rango = (self._problema.MAX_VALUE - self._problema.MIN_VALUE)
+        rango = (self._problema.MAX_VALUE - self._problema.MIN_VALUE) # 4 - 0 
         for i in range(self._cantidad_individuos):
-            valores = np.random.random(size = self._alelos)
+            valores = np.random.randint(0,5, size = self._alelos)
             cromosoma = self._problema.MIN_VALUE +  valores * rango
             individuo = Individuo(self._alelos, cromosoma)
             self._individuos = np.append(self._individuos, [individuo])
 
+
     def evaluaIndividuos(self):
         for i in self._individuos:
             i._fitness = self._problema.fitness(i._cromosoma)
-            if not self._maxim:
-                i._fitness *= -1
 
     def ruleta(self):
         f_sum = np.sum([i._fitness for i in self._individuos])
@@ -89,11 +88,11 @@ class AGC:
         for h in hijos:
             for a in range(len(h._cromosoma)):
                 if np.random.rand() < self._p:
-                    h._cromosoma[a] = self._problema.MIN_VALUE + np.random.random() * rango
+                    h._cromosoma[a] = self._problema.MIN_VALUE + np.random.randint(0,5) * rango
 
     def mejor(self):
         for i in self._individuos:
-            if i._fitness > self._mejor_historico._fitness:
+            if i._fitness < self._mejor_historico._fitness:
                 self._mejor_historico = copy.deepcopy(i)
     
     def getValues(self):
