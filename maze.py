@@ -7,7 +7,7 @@ from numpy.random import poisson
 
 class Cell(str, Enum):
     LIBRE = "-"
-    BLOQUEADO = "X"
+    BLOQUEADO = "#"
     INICIO = "I"
     META = "F"
     CAMINO = "*"
@@ -20,21 +20,32 @@ class Posicion():
 class Maze:
     MIN_VALUE = 0
     MAX_VALUE = 1
-    def __init__(self, filas, columnas, escasez):
+    def __init__(self):
         # initialize variables
-        self._filas = filas
-        self._columnas = columnas
-        self._escasez = escasez
-        self._inicio = Posicion(0, 0)
-        self._actual = Posicion(0, 0)
-        self._meta = Posicion(filas - 1, columnas - 1)
+        #self._filas = filas
+        #self._columnas = columnas
+        #self._escasez = escasez
+        self._inicio = Posicion(5, 1)
+        self._actual = Posicion(5, 1)
+        self._meta = Posicion(8, 13)
+        self._fin = False
         # Fill the maze
-        self._tablero = [[Cell.LIBRE for c in range(columnas)] for r in range(filas)]
+        #self._tablero = [[Cell.LIBRE for c in range(columnas)] for r in range(filas)]
+        self._tablero = [['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
+                         ['#', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '-', '#', '-', '#', '#', '#', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '-', '#', '-', '#', '#', '#', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '#', '#', '-', '#', '-', '#', '-', '-', '#'],
+                         ['#', 'I', '#', '#', '#', '#', '-', '-', '-', '#', '-', '#', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '-', '#'],
+                         ['#', '-', '#', '#', '#', '-', '-', '-', '-', '-', '-', '#', '#', '-', '#'],
+                         ['#', '-', '-', '-', '-', '-', '#', '#', '#', '#', '-', '-', '#', 'F', '#'],
+                         ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']]
         # Add the BLOQUEADO cells
-        self._poner_obstaculos(filas, columnas, escasez)        
+        #self._poner_obstaculos(filas, columnas, escasez)        
         self._tablero[self._inicio.fila][self._inicio.columna] = Cell.INICIO
         self._tablero[self._meta.fila][self._meta.columna] = Cell.META
-        self._copiaTablero = copy.deepcopy(self._tablero)
+        #self._copiaTablero = copy.deepcopy(self._tablero)
         self._penalties = 0
 
     def _poner_obstaculos(self, filas, columnas, escasez):
@@ -48,7 +59,7 @@ class Maze:
         for fila in self._tablero:
             for c in fila:
                 out += " "
-                out += c.value
+                out += c
                 out += " "
             out += "\n"
         return out
@@ -63,10 +74,15 @@ class Maze:
         if self._tablero[posicion.fila][posicion.columna] == Cell.BLOQUEADO:
             self._penalties += 1
         
-        if self.isMETACell(posicion) or self._tablero[posicion.fila][posicion.columna] == Cell.LIBRE:
-           self._actual = posicion
-           self._tablero[posicion.fila][posicion.columna] = Cell.CAMINO 
-        
+        if self.isMETACell(posicion):
+            self._actual = posicion
+            self._fin = True
+            self._tablero[posicion.fila][posicion.columna] = "P"
+
+        if self._tablero[posicion.fila][posicion.columna] == Cell.LIBRE:
+            self._tablero[posicion.fila][posicion.columna] = Cell.CAMINO 
+            self._actual = posicion
+
     def camino(self, camino):
         for posicion in camino:
             self._tablero[posicion.fila][posicion.columna] = Cell.CAMINO
@@ -75,44 +91,43 @@ class Maze:
 
     def arriba(self):
         posicion = Posicion(self._actual.fila-1, self._actual.columna)
-        if posicion.fila >= 0:
-            self.mover(posicion)
+        self.mover(posicion)
 
     def abajo(self):
         posicion = Posicion(self._actual.fila + 1, self._actual.columna)
-        if posicion.fila < self._filas:
-            self.mover(posicion)
+        self.mover(posicion)
 
     def izquierda(self):
         posicion = Posicion(self._actual.fila, self._actual.columna-1)
-        if posicion.columna >= 0:
-            self.mover(posicion)
+        self.mover(posicion)
 
     def derecha(self):
         posicion = Posicion(self._actual.fila, self._actual.columna+1)
-        if posicion.columna < self._columnas:
-            self.mover(posicion)
+        self.mover(posicion)
 
     def fitness(self, cromosoma):
         f = 0
         for alelo in cromosoma:
-            if alelo == 0:
-                pass
-            elif alelo == 1:    
-                self.arriba()
-            elif alelo == 2:
-                self.abajo()
-            elif alelo == 3:
-                self.izquierda()
-            elif alelo == 4:
-                self.derecha()
+            if self._fin == False:
+                if alelo == 0:
+                    pass
+                elif alelo == 1:    
+                    self.arriba()
+                elif alelo == 2:
+                    self.abajo()
+                elif alelo == 3:
+                    self.izquierda()
+                elif alelo == 4:
+                    self.derecha()
+        self._tablero[self._actual.fila][self._actual.columna] = "P"
         f = self.heuristica(self._meta, self._actual) + self._penalties
+        print(self)
         self.reinicioTablero()
         return f
 
     def heuristica(self, meta, actual):
-        x = abs(actual.columna - meta.columna)
-        y = abs(actual.fila - meta.columna)
+        x = abs(meta.fila - actual.fila) # x actual y= n
+        y = abs(meta.columna - actual.columna)
         return (x + y)
         
 
@@ -120,6 +135,15 @@ class Maze:
         if self._actual != self._inicio:
             self._actual = self._inicio
         
-        self._tablero = self._copiaTablero
+        self._tablero = [['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
+                         ['#', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '-', '#', '-', '#', '#', '#', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '-', '#', '-', '#', '#', '#', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '#', '#', '-', '#', '-', '#', '-', '-', '#'],
+                         ['#', 'I', '#', '#', '#', '#', '-', '-', '-', '#', '-', '#', '-', '-', '#'],
+                         ['#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '-', '#'],
+                         ['#', '-', '#', '#', '#', '-', '-', '-', '-', '-', '-', '#', '#', '-', '#'],
+                         ['#', '-', '-', '-', '-', '-', '#', '#', '#', '#', '-', '-', '#', 'F', '#'],
+                         ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']]
         self._penalties = 0
 

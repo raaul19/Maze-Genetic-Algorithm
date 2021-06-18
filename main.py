@@ -4,8 +4,8 @@ import numpy as np
 
 
 def main():
-    s =  Maze(10,15,0.2)
-    ag = AGC.AGC(300, 50 , 1000, 0.02, s)
+    s =  Maze()
+    ag = AGC.AGC(64, 100 , 10, 0.5, s)
     
     ag.run()
     
