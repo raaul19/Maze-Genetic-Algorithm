@@ -36,11 +36,10 @@ class AGC:
             self.mutacion(hijos)
             self._individuos = np.copy(hijos)
 
-            if generacion % 10 == 0:
-                print(f'Generación: {generacion} Mejor Histórico: \
-                {self._mejor_historico._cromosoma} {self._mejor_historico._fitness :.5f}')
+            if generacion % 100 == 0:
+                print(f'Generación: {generacion}')
+                print(f'Mejor Histórico:{self._mejor_historico._cromosoma} {self._mejor_historico._fitness :.5f}')
                 self._values.append(self._mejor_historico._fitness)
-                print(self._problema)
             generacion += 1
 
 

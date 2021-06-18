@@ -121,7 +121,6 @@ class Maze:
                     self.derecha()
         self._tablero[self._actual.fila][self._actual.columna] = "P"
         f = self.heuristica(self._meta, self._actual) + self._penalties
-        print(self)
         self.reinicioTablero()
         return f
 
