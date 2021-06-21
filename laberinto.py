@@ -1,11 +1,9 @@
 from enum import Enum
 import random
-from math import sqrt
-import copy
 
 from numpy.random import poisson
 
-class Cell(str, Enum):
+class Casilla(str, Enum):
     LIBRE = "-"
     BLOQUEADO = "#"
     INICIO = "I"
@@ -17,20 +15,15 @@ class Posicion():
         self.fila = fila
         self.columna = columna
 
-class Maze:
+class Laberinto:
     MIN_VALUE = 0
     MAX_VALUE = 1
     def __init__(self):
-        # initialize variables
-        #self._filas = filas
-        #self._columnas = columnas
-        #self._escasez = escasez
+        # Inicializando variables
         self._inicio = Posicion(5, 1)
         self._actual = Posicion(5, 1)
         self._meta = Posicion(8, 13)
         self._fin = False
-        # Fill the maze
-        #self._tablero = [[Cell.LIBRE for c in range(columnas)] for r in range(filas)]
         self._tablero = [['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
                          ['#', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#'],
                          ['#', '-', '#', '#', '#', '#', '-', '#', '-', '#', '#', '#', '-', '-', '#'],
@@ -40,19 +33,16 @@ class Maze:
                          ['#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '-', '#'],
                          ['#', '-', '#', '#', '#', '-', '-', '-', '-', '-', '-', '#', '#', '-', '#'],
                          ['#', '-', '-', '-', '-', '-', '#', '#', '#', '#', '-', '-', '#', 'F', '#'],
-                         ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']]
-        # Add the BLOQUEADO cells
-        #self._poner_obstaculos(filas, columnas, escasez)        
-        self._tablero[self._inicio.fila][self._inicio.columna] = Cell.INICIO
-        self._tablero[self._meta.fila][self._meta.columna] = Cell.META
-        #self._copiaTablero = copy.deepcopy(self._tablero)
-        self._penalties = 0
+                         ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']]    
+        self._tablero[self._inicio.fila][self._inicio.columna] = Casilla.INICIO
+        self._tablero[self._meta.fila][self._meta.columna] = Casilla.META
+        self._sanciones = 0
 
     def _poner_obstaculos(self, filas, columnas, escasez):
         for fila in range(filas):
             for columna in range(columnas):
                 if random.uniform(0, 1.0) < escasez:
-                    self._tablero[fila][columna] = Cell.BLOQUEADO
+                    self._tablero[fila][columna] = Casilla.BLOQUEADO
                     
     def __str__(self):
         out = ""
@@ -71,23 +61,23 @@ class Maze:
 
     def mover(self, posicion):
 
-        if self._tablero[posicion.fila][posicion.columna] == Cell.BLOQUEADO:
-            self._penalties += 1
+        if self._tablero[posicion.fila][posicion.columna] == Casilla.BLOQUEADO:
+            self._sanciones += 1
         
         if self.isMETACell(posicion):
             self._actual = posicion
             self._fin = True
             self._tablero[posicion.fila][posicion.columna] = "P"
 
-        if self._tablero[posicion.fila][posicion.columna] == Cell.LIBRE:
-            self._tablero[posicion.fila][posicion.columna] = Cell.CAMINO 
+        if self._tablero[posicion.fila][posicion.columna] == Casilla.LIBRE:
+            self._tablero[posicion.fila][posicion.columna] = Casilla.CAMINO 
             self._actual = posicion
 
     def camino(self, camino):
         for posicion in camino:
-            self._tablero[posicion.fila][posicion.columna] = Cell.CAMINO
-        self._tablero[self._inicio.fila][self._inicio.columna] = Cell.INICIO
-        self._tablero[self._meta.fila][self._meta.columna] = Cell.META
+            self._tablero[posicion.fila][posicion.columna] = Casilla.CAMINO
+        self._tablero[self._inicio.fila][self._inicio.columna] = Casilla.INICIO
+        self._tablero[self._meta.fila][self._meta.columna] = Casilla.META
 
     def arriba(self):
         posicion = Posicion(self._actual.fila-1, self._actual.columna)
@@ -120,7 +110,7 @@ class Maze:
                 elif alelo == 4:
                     self.derecha()
         self._tablero[self._actual.fila][self._actual.columna] = "P"
-        f = self.heuristica(self._meta, self._actual) + self._penalties
+        f = self.heuristica(self._meta, self._actual) + self._sanciones
         self.reinicioTablero()
         return f
 
@@ -133,7 +123,6 @@ class Maze:
     def reinicioTablero(self):
         if self._actual != self._inicio:
             self._actual = self._inicio
-        
         self._tablero = [['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
                          ['#', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#'],
                          ['#', '-', '#', '#', '#', '#', '-', '#', '-', '#', '#', '#', '-', '-', '#'],
@@ -144,5 +133,5 @@ class Maze:
                          ['#', '-', '#', '#', '#', '-', '-', '-', '-', '-', '-', '#', '#', '-', '#'],
                          ['#', '-', '-', '-', '-', '-', '#', '#', '#', '#', '-', '-', '#', 'F', '#'],
                          ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']]
-        self._penalties = 0
+        self._sanciones = 0
 

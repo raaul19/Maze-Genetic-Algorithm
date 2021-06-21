@@ -15,7 +15,6 @@ class AGC:
         self._p = p
         self._problema = problema
         self._individuos = np.array([])
-        self._values = []
 
     def run(self):
         self.crearIndividuos()
@@ -39,7 +38,6 @@ class AGC:
             if generacion % 100 == 0:
                 print(f'Generación: {generacion}')
                 print(f'Mejor Histórico:{self._mejor_historico._cromosoma} {self._mejor_historico._fitness :.5f}')
-                self._values.append(self._mejor_historico._fitness)
             generacion += 1
 
 
@@ -93,6 +91,4 @@ class AGC:
         for i in self._individuos:
             if i._fitness < self._mejor_historico._fitness:
                 self._mejor_historico = copy.deepcopy(i)
-    
-    def getValues(self):
-        return self._values
+                
