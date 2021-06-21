@@ -37,12 +37,6 @@ class Laberinto:
         self._tablero[self._inicio.fila][self._inicio.columna] = Casilla.INICIO
         self._tablero[self._meta.fila][self._meta.columna] = Casilla.META
         self._sanciones = 0
-
-    def _poner_obstaculos(self, filas, columnas, escasez):
-        for fila in range(filas):
-            for columna in range(columnas):
-                if random.uniform(0, 1.0) < escasez:
-                    self._tablero[fila][columna] = Casilla.BLOQUEADO
                     
     def __str__(self):
         out = ""
@@ -54,7 +48,7 @@ class Laberinto:
             out += "\n"
         return out
 
-    def isMETACell(self, posicion):
+    def esCasillaMeta(self, posicion):
         if posicion.fila == self._meta.fila and  posicion.columna == self._meta.columna:
             return True
         return False
@@ -64,7 +58,7 @@ class Laberinto:
         if self._tablero[posicion.fila][posicion.columna] == Casilla.BLOQUEADO:
             self._sanciones += 1
         
-        if self.isMETACell(posicion):
+        if self.esCasillaMeta(posicion):
             self._actual = posicion
             self._fin = True
             self._tablero[posicion.fila][posicion.columna] = "P"
@@ -72,12 +66,6 @@ class Laberinto:
         if self._tablero[posicion.fila][posicion.columna] == Casilla.LIBRE:
             self._tablero[posicion.fila][posicion.columna] = Casilla.CAMINO 
             self._actual = posicion
-
-    def camino(self, camino):
-        for posicion in camino:
-            self._tablero[posicion.fila][posicion.columna] = Casilla.CAMINO
-        self._tablero[self._inicio.fila][self._inicio.columna] = Casilla.INICIO
-        self._tablero[self._meta.fila][self._meta.columna] = Casilla.META
 
     def arriba(self):
         posicion = Posicion(self._actual.fila-1, self._actual.columna)
@@ -115,7 +103,7 @@ class Laberinto:
         return f
 
     def heuristica(self, meta, actual):
-        x = abs(meta.fila - actual.fila) # x actual y= n
+        x = abs(meta.fila - actual.fila)
         y = abs(meta.columna - actual.columna)
         return (x + y)
         
