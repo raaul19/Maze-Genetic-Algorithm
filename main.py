@@ -14,6 +14,7 @@ def imprimirSolucion(solucion):
             laberinto.izquierda()
         elif s == 4:
             laberinto.derecha()
+    laberinto._tablero[laberinto._actual.fila][laberinto._actual.columna] = "P"
     print("\tLaberinto final: \n")
     print(laberinto)
         

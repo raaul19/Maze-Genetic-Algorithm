@@ -42,7 +42,7 @@ class AGC:
 
 
     def crearIndividuos(self):
-        rango = (self._problema.MAX_VALUE - self._problema.MIN_VALUE) # 4 - 0 
+        rango = (self._problema.MAX_VALUE - self._problema.MIN_VALUE) 
         for i in range(self._cantidad_individuos):
             valores = np.random.randint(0,5, size = self._alelos)
             cromosoma = self._problema.MIN_VALUE +  valores * rango
@@ -91,4 +91,3 @@ class AGC:
         for i in self._individuos:
             if i._fitness < self._mejor_historico._fitness:
                 self._mejor_historico = copy.deepcopy(i)
-                
